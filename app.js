@@ -93,7 +93,7 @@ passport.use(new GoogleStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    //callbackURL: "https://mygrate.herokuapp.com/signin-google",
+    //callbackURL: "https://myGration.herokuapp.com/signin-google",
     callbackURL: "https://localhost/signin-google",
     passReqToCallback: true
 },
@@ -130,7 +130,7 @@ passport.use(new FacebookStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    callbackURL: "https://mygrate.herokuapp.com/signin-facebook",
+    callbackURL: "https://myGration.herokuapp.com/signin-facebook",
     //callbackURL: "https://localhost/signin-facebook",
     passReqToCallback: true,
     profileFields: ['id', 'name', 'photos', 'email']
@@ -298,6 +298,19 @@ app.get('/tabs', ensureAuthenticated, function (req, res) {
     });
 });
 
+app.post('/likeMessage', ensureAuthenticated, function (req, res) {
+    var postId = req.body.postId;
+    var userId = req.user.id;
+    AddLikeIfPossible(postId, userId, function (err) {
+        if (err) {
+            res.json({ error: err });
+        }
+        else {
+            res.json();
+        }
+    });
+});
+
 app.post('/postMessage', ensureAuthenticated, function (req, res) {
     var id = req.body.postId;
     if (!id) {
@@ -390,6 +403,7 @@ function ensureAuthenticated(req, res, next) {
     if (req.user) { return next(); }
     res.redirect('/login');
 }
+
 
 
 function InsertOrUpdateUserInDatabase(userId, famName, giveName, email, picture, lastSessionId, callback) {
@@ -573,6 +587,38 @@ function UpdateDistanceAndRecruiter(userId, distance, is_recruiter, callback) {
     }
 }
 
+
+function AddLikeIfPossible(postId, userId, callback)
+{
+    //acquire a connection
+    try {
+        pool.acquire(function (err1, connection) {
+            if (err1) {
+                console.log(err1);
+                callback(err1, false);
+            }
+
+            var request = new Request("IF NOT EXISTS (SELECT * FROM Likes WHERE PostId=@PostId AND UserId=@UserId) UPDATE Posts SET Likes=(Likes+1) WHERE PostId=@PostId; IF NOT EXISTS (SELECT * FROM Likes WHERE PostId=@PostId AND UserId=@UserId) INSERT INTO Likes (UserId, PostId) VALUES (@UserId,@PostId) ", function (err) {
+                if (err) {
+                    console.log(err);
+                    connection.release();
+                    callback(err, false);
+                }
+                else {
+                    console.log("success");
+                    connection.release();
+                    callback(err, true);
+                }
+            });
+            request.addParameter('PostId', TYPES.Int, postId);
+            request.addParameter('UserId', TYPES.NChar, userId);
+            connection.execSql(request);
+        });
+    }
+    catch (exception) {
+        var x = 0;
+    }
+}
 
 function InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message, lat, long, time, callback) {
     //acquire a connection

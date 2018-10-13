@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>myGrate</title>
+		<title>myGration</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="css/main.css" />
@@ -50,18 +50,18 @@
 							<p>Language: <%= user.language %></p>
 						</div>
 
-					<!-- Nav -->
-						<nav style="background-color: #222222; text-align: right" id="nav">
-							<ul>
-								<li><a href="/">About Us</a></li>
-								<%if (!user) { %>
-			          	<li><a href="/login">Login</a></li>
-								<% } else { %>
-			          	<li><a href="/profile">My Profile</a></li>
-			          	<li><a href="/logout">Logout</a></li>
-								<% } %>
-							</ul>
-						</nav>
+				<!-- Nav -->
+				<nav style="background-color: #000000;"  id="nav">
+					<ul>
+						<li><a href='/'>Home</a></li>
+						<li><a style='color:crimson'>Profile</a></li>
+						<li><a href='/tabs''>Posts Near You</a></li>
+						<li><a href='/jobsnearyou'>Jobs Near You</a></li>
+						<li><a href='/trendingposts'>Trending Posts</a></li>
+						<li><a href='/trendingjobs'>Trending Jobs</a></li>
+						<li><a href='/logout'>Logout</a></li>
+					</ul>
+				</nav>
 				</div>
 		</div>
 
