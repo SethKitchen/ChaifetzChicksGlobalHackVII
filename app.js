@@ -237,15 +237,15 @@ app.get('/', function (req, res) {
 });
 
 app.get('/profile', ensureAuthenticated, function (req, res) {
-    GetDistanceAndRecruiter(req.user.id, function (err, json) {
-        res.render('profile', { title: 'Chicks', user: req.user, distance:json[0].Distance, recruiter:json[0].IsRecruiter });
+    GetDistance(req.user.id, function (err, json) {
+        res.render('profile', { title: 'Chicks', user: req.user, distance:json[0].Distance });
     });
 });
 
 app.post('/updateDistance', ensureAuthenticated, function (req, res) {
-    UpdateDistanceAndRecruiter(req.user.id, req.body.distance, req.body.isRecruiter, function (err) {
-        GetDistanceAndRecruiter(req.user.id, function (err, json) {
-            res.render('profile', { title: 'Chicks', user: req.user, distance: json[0].Distance, recruiter: json[0].IsRecruiter });
+    UpdateDistance(req.user.id, req.body.distance, function (err) {
+        GetDistance(req.user.id, function (err, json) {
+            res.render('profile', { title: 'Chicks', user: req.user, distance: json[0].Distance });
         });
     });
 });
@@ -414,7 +414,7 @@ function InsertOrUpdateUserInDatabase(userId, famName, giveName, email, picture,
             callback(err1, false);
         }
 
-        var request = new Request("IF EXISTS (SELECT * FROM Users WHERE UserId=@UserId) UPDATE Users SET FamilyName=@FamilyName, GivenName=@GivenName, Email=@Email, Picture=@Picture, LastSessionId=@LastSessionId WHERE UserId=@UserId ELSE INSERT INTO Users (UserId, FamilyName, GivenName, Email, Picture, LastSessionId, Distance, IsRecruiter) VALUES(@UserId,@FamilyName,@GivenName,@Email,@Picture,@LastSessionId, 50, 0)", function (err) {
+        var request = new Request("IF EXISTS (SELECT * FROM Users WHERE UserId=@UserId) UPDATE Users SET FamilyName=@FamilyName, GivenName=@GivenName, Email=@Email, Picture=@Picture, LastSessionId=@LastSessionId WHERE UserId=@UserId ELSE INSERT INTO Users (UserId, FamilyName, GivenName, Email, Picture, LastSessionId, Distance) VALUES (@UserId,@FamilyName,@GivenName,@Email,@Picture,@LastSessionId, 50)", function (err) {
             if (err) {
                 console.log(err);
                 connection.release();
@@ -473,7 +473,7 @@ function GetUserDistance(userId, callback) {
     }); 
 }
 
-function GetDistanceAndRecruiter(userId, callback) {
+function GetDistance(userId, callback) {
     var jsonArray = [];
     //acquire a connection
     pool.acquire(function (err1, connection) {
@@ -482,14 +482,14 @@ function GetDistanceAndRecruiter(userId, callback) {
             callback(err1, false);
         }
 
-        var request = new Request("SELECT DISTINCT Distance, IsRecruiter FROM Users WHERE UserId = @UserId;", function (err, result) {
+        var request = new Request("SELECT DISTINCT Distance FROM Users WHERE UserId = @UserId;", function (err, result) {
             if (err) {
                 console.log(err);
                 connection.release();
                 callback(err, false);
             }
             else {
-                console.log("Get Distance and Recruiter finished calling back with result=" + result);
+                console.log("Get Distance finished calling back with result=" + result);
                 err = null;
                 connection.release();
                 if (jsonArray.length == 0) {
@@ -554,7 +554,7 @@ function GetAllPostsInPastTwoDays(callback) {
     });
 }
 
-function UpdateDistanceAndRecruiter(userId, distance, is_recruiter, callback) {
+function UpdateDistance(userId, distance, callback) {
     //acquire a connection
     try {
         pool.acquire(function (err1, connection) {
@@ -563,7 +563,7 @@ function UpdateDistanceAndRecruiter(userId, distance, is_recruiter, callback) {
                 callback(err1, false);
             }
 
-            var request = new Request("UPDATE Users SET Distance=@Distance, IsRecruiter=@IsRecruiter WHERE UserId=@UserId", function (err) {
+            var request = new Request("UPDATE Users SET Distance=@Distance WHERE UserId=@UserId", function (err) {
                 if (err) {
                     console.log(err);
                     connection.release();
@@ -576,7 +576,6 @@ function UpdateDistanceAndRecruiter(userId, distance, is_recruiter, callback) {
                 }
             });
             request.addParameter('Distance', TYPES.Int, distance);
-            request.addParameter('IsRecruiter', TYPES.Int, is_recruiter);
             request.addParameter('UserId', TYPES.NChar, userId);
             connection.execSql(request);
         });
