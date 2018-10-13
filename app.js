@@ -131,7 +131,7 @@ passport.use(new FacebookStrategy({
     callbackURL: "https://mygrate.herokuapp.com/signin-facebook",
     //callbackURL: "https://localhost/signin-facebook",
     passReqToCallback: true,
-    profileFields: ['id', 'displayName', 'photos', 'email']
+    profileFields: ['id', 'name', 'photos', 'email']
 },
     function (request, accessToken, refreshToken, profile, done) {
         // asynchronous verification, for effect...
@@ -146,7 +146,7 @@ passport.use(new FacebookStrategy({
             if (profile.photos.length > 0) {
                 picture = profile.photos[0].value;
             }
-            InsertOrUpdateUserInDatabase(profile.id, profile.name.familyName, profile.name.givenName, profile.email, picture, request.session.id, function () {
+            InsertOrUpdateUserInDatabase(profile.id, profile.name.familyName, profile.name.givenName, profile._json.email, picture, request.session.id, function () {
                 return done(null, profile);
             });
         });
