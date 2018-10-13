@@ -93,8 +93,8 @@ passport.use(new GoogleStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    callbackURL: "https://mygrate.herokuapp.com/signin-google",
-    //callbackURL: "https://localhost/signin-google",
+    //callbackURL: "https://mygrate.herokuapp.com/signin-google",
+    callbackURL: "https://localhost/signin-google",
     passReqToCallback: true
 },
     function (request, accessToken, refreshToken, profile, done) {
@@ -282,21 +282,33 @@ app.post('/postMessage', ensureAuthenticated, function (req, res) {
     var lat = req.body.lat;
     var long = req.body.long;
     var time = req.body.time;
-    if (req.body.isAnon)
-    {
+    if (req.body.isAnon) {
         displayName = 'Anonymous';
         picture = 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/User_font_awesome.svg/1000px-User_font_awesome.svg.png';
         InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message, lat, long, time, function (err) {
             if (err) {
                 res.status(err.status || 500);
                 res.json({
-                    message: err.message,
                     error: err
                 });
             }
             else {
                 res.json({
-                    message: 'Successfully Posted!',
+                    error: null
+                });
+            }
+        });
+    }
+    else {
+        InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message, lat, long, time, function (err) {
+            if (err) {
+                res.status(err.status || 500);
+                res.json({
+                    error: err
+                });
+            }
+            else {
+                res.json({
                     error: null
                 });
             }
@@ -426,7 +438,7 @@ function GetAllPostsInPastTwoDays(callback) {
             callback(err1, false);
         }
 
-        var request = new Request("SELECT DisplayName, Picture, Message, Lat, Long, PostId, Likes FROM Posts WHERE Time >= cast(dateadd(day, -2, getdate()) as date)", function (err) {
+        var request = new Request("SELECT DisplayName, Picture, Message, Lat, Long, PostId, Likes, Time FROM Posts WHERE Time >= cast(dateadd(day, -2, getdate()) as date)", function (err) {
             if (err) {
                 console.log(err);
                 connection.release();
