@@ -10,11 +10,13 @@ var util = require('util');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var geoip = require('geoip-lite');
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var geolib = require('geolib');
 var sql = require('tedious').Connection;
 var Request = require('tedious').Request;
 var ConnectionPool = require('tedious-connection-pool');
@@ -91,8 +93,8 @@ passport.use(new GoogleStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    callbackURL: "https://mygrate.herokuapp.com/signin-google",
-    //callbackURL: "https://localhost/signin-google",
+    //callbackURL: "https://mygrate.herokuapp.com/signin-google",
+    callbackURL: "https://localhost/signin-google",
     passReqToCallback: true
 },
     function (request, accessToken, refreshToken, profile, done) {
@@ -211,13 +213,13 @@ app.get('/auth/facebook',
 //   which, in this example, will redirect the user to the home page.
 app.get('/signin-google',
     passport.authenticate('google', {
-        successRedirect: '/',
+        successRedirect: '/tabs',
         failureRedirect: '/login'
     }));
 
 app.get('/signin-facebook',
     passport.authenticate('facebook', {
-        successRedirect: '/',
+        successRedirect: '/tabs',
         failureRedirect: '/login'
     }));
 
@@ -235,22 +237,44 @@ app.get('/login', function (req, res) {
 });
 
 app.get('/tabs', ensureAuthenticated, function (req, res) {
-    res.render('tabs', { title: 'Chicks', user: req.user });
+    GetUserDistance(req.user.id, function (err, dis) {
+        if (err) {
+            res.json({ error: err });
+        }
+        else {
+            GetAllPostsInPastTwoDays(function (err, result) {
+                var geo = geoip.lookup(req.connection.remoteAddress);
+                console.log(geo);
+                for (var i = 0; i < result.length; i++) {
+                    if (geolib.getDistance({ latitude: geo.ll[0], longitude: geo.ll[1] }, { latitude: result[i].Lat, longitude: result[i].Long }) > dis) {
+                        console.log('splicing');
+                        result.splice(i, 1);
+                        i--;
+                    }
+                }
+                console.log('rendering...');
+                res.render('tabs', { title: 'Chicks', user: req.user, posts:result });
+            });
+        }
+    });
 });
 
 app.post('/postMessage', ensureAuthenticated, function (req, res) {
-    var id = req.id;
+    var id = req.body.postId;
+    if (!id) {
+        id = -1;
+    }
     var userId = req.user.id;
     var displayName = req.user.name.givenName + ' ' + req.user.name.familyName;
     var picture = null;
-    if (user.photos.length > 0) {
-        picture = user.photos[0].value;
+    if (req.user.photos.length > 0) {
+        picture = req.user.photos[0].value;
     }
-    var message = req.message;
-    var lat = req.lat;
-    var long = req.long;
-    var time = req.time;
-    if (req.isAnon)
+    var message = req.body.message;
+    var lat = req.body.lat;
+    var long = req.body.long;
+    var time = req.body.time;
+    if (req.body.isAnon)
     {
         displayName = 'Anonymous';
         picture = 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/User_font_awesome.svg/1000px-User_font_awesome.svg.png';
@@ -325,7 +349,7 @@ function InsertOrUpdateUserInDatabase(userId, famName, giveName, email, picture,
             callback(err1, false);
         }
 
-        var request = new Request("IF EXISTS (SELECT * FROM Users WHERE UserId=@UserId) UPDATE Users SET FamilyName=@FamilyName, GivenName=@GivenName, Email=@Email, Picture=@Picture, LastSessionId=@LastSessionId WHERE UserId=@UserId ELSE INSERT INTO Users (UserId, FamilyName, GivenName, Email, Picture, LastSessionId) VALUES(@UserId,@FamilyName,@GivenName,@Email,@Picture,@LastSessionId)", function (err) {
+        var request = new Request("IF EXISTS (SELECT * FROM Users WHERE UserId=@UserId) UPDATE Users SET FamilyName=@FamilyName, GivenName=@GivenName, Email=@Email, Picture=@Picture, LastSessionId=@LastSessionId WHERE UserId=@UserId ELSE INSERT INTO Users (UserId, FamilyName, GivenName, Email, Picture, LastSessionId, Distance, IsRecruiter) VALUES(@UserId,@FamilyName,@GivenName,@Email,@Picture,@LastSessionId, 50, 0)", function (err) {
             if (err) {
                 console.log(err);
                 connection.release();
@@ -347,7 +371,8 @@ function InsertOrUpdateUserInDatabase(userId, famName, giveName, email, picture,
     });
 }
 
-function InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message, lat, long, time, callback) {
+function GetUserDistance(userId, callback) {
+    var result = null;
     //acquire a connection
     pool.acquire(function (err1, connection) {
         if (err1) {
@@ -355,7 +380,45 @@ function InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message,
             callback(err1, false);
         }
 
-        var request = new Request("IF EXISTS (SELECT * FROM Posts WHERE id=@PostId) UPDATE Posts SET UserId=@UserId, DisplayName=@DisplayName, Picture=@Picture, Message=@Message, Lat=@Lat, Long=@Long, Time=@Time WHERE PostId=@PostId ELSE INSERT INTO Posts (UserId, DisplayName, Picture, Message, Lat, Long, Time, Likes) VALUES(@UserId,@DisplayName,@Picture,@Message,@Lat,@Long,@Time, 0)", function (err) {
+        var request = new Request("SELECT @dis=Distance FROM Users WHERE UserId = @UserId;", function (err) {
+            if (err) {
+                console.log(err);
+                connection.release();
+                callback(err, false);
+            }
+            else {
+                console.log("Get User Distance Finished calling back with result=" + result);
+                err = null;
+                connection.release();
+                callback(err, result);
+            }
+        });
+
+        request.addParameter('UserId', TYPES.NChar, userId);
+        request.addOutputParameter('dis', TYPES.Int);
+
+
+        request.on('returnValue', function (parameterName, value, metadata) {
+            if (parameterName === 'dis' && value) {
+                result = value;
+            }
+        });
+
+        connection.execSql(request);
+    }); 
+}
+
+function GetAllPostsInPastTwoDays(callback) {
+    //acquire a connection
+    pool.acquire(function (err1, connection) {
+        var jsonArray = [];
+
+        if (err1) {
+            console.log(err1);
+            callback(err1, false);
+        }
+
+        var request = new Request("SELECT DisplayName, Picture, Message, Lat, Long, PostId, Likes FROM Posts WHERE Time >= cast(dateadd(day, -2, getdate()) as date)", function (err) {
             if (err) {
                 console.log(err);
                 connection.release();
@@ -364,19 +427,60 @@ function InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message,
             else {
                 console.log("success");
                 connection.release();
-                callback(err, true);
+                callback(err, jsonArray);
             }
         });
-        request.addParameter('PostId', TYPES.Int, id);
-        request.addParameter('UserId', TYPES.NChar, userId);
-        request.addParameter('DisplayName', TYPES.NChar, displayName);
-        request.addParameter('Picture', TYPES.NChar, picture);
-        request.addParameter('Message', TYPES.NChar, message);
-        request.addParameter('Lat', TYPES.Decimal, lat);
-        request.addParameter('Long', TYPES.Decimal, long);
-        request.addParameter('Time', TYPES.DateTime, time);
+
+        request.on('doneInProc', function (rowCount, more, rows) {
+            rows.forEach(function (columns) {
+                var rowObject = {};
+                columns.forEach(function (column) {
+                    rowObject[column.metadata.colName] = column.value.toString().trim();
+                });
+                jsonArray.push(rowObject);
+            });
+        });
+
         connection.execSql(request);
     });
+}
+
+function InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message, lat, long, time, callback) {
+    //acquire a connection
+    try {
+        pool.acquire(function (err1, connection) {
+            if (err1) {
+                console.log(err1);
+                callback(err1, false);
+            }
+
+            var request = new Request("IF EXISTS (SELECT * FROM Posts WHERE PostId=@PostId) UPDATE Posts SET UserId=@UserId, DisplayName=@DisplayName, Picture=@Picture, Message=@Message, Lat=@Lat, Long=@Long, Time=@Time WHERE PostId=@PostId ELSE INSERT INTO Posts (UserId, DisplayName, Picture, Message, Lat, Long, Time, Likes) VALUES(@UserId,@DisplayName,@Picture,@Message,@Lat,@Long,@Time, 0)", function (err) {
+                if (err) {
+                    console.log(err);
+                    connection.release();
+                    callback(err, false);
+                }
+                else {
+                    console.log("success");
+                    connection.release();
+                    callback(err, true);
+                }
+            });
+            request.addParameter('PostId', TYPES.Int, id);
+            request.addParameter('UserId', TYPES.NChar, userId);
+            request.addParameter('DisplayName', TYPES.NChar, displayName);
+            request.addParameter('Picture', TYPES.NChar, picture);
+            request.addParameter('Message', TYPES.NChar, message);
+            request.addParameter('Lat', TYPES.Decimal, lat);
+            request.addParameter('Long', TYPES.Decimal, long);
+            request.addParameter('Time', TYPES.Date, time);
+            connection.execSql(request);
+        });
+    }
+    catch (exception) {
+        var x = 0;
+
+    }
 }
 
 

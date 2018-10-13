@@ -85,9 +85,6 @@
     <Content Include="server.crt" />
     <Content Include="server.key" />
     <Content Include="views\index.ejs" />
-    <Content Include="views\left-sidebar.ejs" />
-    <Content Include="views\no-sidebar.ejs" />
-    <Content Include="views\right-sidebar.ejs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="public\css\images\" />
