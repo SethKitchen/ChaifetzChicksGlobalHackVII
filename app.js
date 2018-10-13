@@ -19,12 +19,11 @@ var Request = require('tedious').Request;
 var ConnectionPool = require('tedious-connection-pool');
 var TYPES = require('tedious').TYPES;
 var forceSsl = require('express-force-ssl');
-var GOOGLE_CLIENT_ID = "250633503423-ajgjonm0m9cf1sb5lnh97ivgtdcj4eij.apps.googleusercontent.com";
-var GOOGLE_CLIENT_SECRET = "4qmNAVjEMnQLYh9bQK5HrQfy"; //tbd
+var GOOGLE_CLIENT_ID = "250633503423-iunr9hrp9cbmppcqfc8e0p8bbc34d6uk.apps.googleusercontent.com";
+var GOOGLE_CLIENT_SECRET = "cqjAY41SnLE9twUiJytKhkvC"; 
 var MemoryStore = session.MemoryStore;
 var sessionStore = new MemoryStore();
 
-var GOOGLE
 process.on('uncaughtException', function (err) {
     console.error(err);
     console.log("Node NOT Exiting...");
@@ -88,6 +87,8 @@ passport.use(new GoogleStrategy({
     //then edit your /etc/hosts local file to point on your private IP. 
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
+    //Switch these depending on release version--
+    //callbackURL: "https://mygrate.herokuapp.com/signin-google",
     callbackURL: "https://localhost/signin-google",
     passReqToCallback: true
 },
@@ -103,10 +104,9 @@ passport.use(new GoogleStrategy({
             if (profile.photos.length > 0) {
                 picture = profile.photos[0].value;
             }
-            /*InsertOrUpdateUserInDatabase(profile.id, profile.name.familyName, profile.name.givenName, profile.email, picture, request.session.id, function () {
-
+            InsertOrUpdateUserInDatabase(profile.id, profile.name.familyName, profile.name.givenName, profile.email, picture, request.session.id, function () {
                 return done(null, profile);
-            }); */
+            });
         });
     }
 ));
@@ -143,11 +143,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-/*
-app.use('/', routes);
-app.use('/users', users);
-*/
-
 // GET /auth/google
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  The first step in Google authentication will involve
@@ -178,6 +173,89 @@ app.get('/logout', function (req, res) {
 app.get('/', function (req, res) {
     res.render('index', { title: 'Chicks', user: req.user });
 });
+
+app.get('/login', function (req, res) {
+    res.render('login', { title: 'Chicks', user: req.user });
+});
+
+app.get('/tabs', ensureAuthenticated, function (req, res) {
+    res.render('tabs', { title: 'Chicks', user: req.user });
+});
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    var err = new Error('Not Found');
+    err.status = 404;
+    next(err);
+});
+
+
+// error handlers
+
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+    app.use(function (err, req, res, next) {
+        res.status(err.status || 500);
+        res.render('error', {
+            message: err.message,
+            error: err
+        });
+    });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function (err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+        message: err.message,
+        error: {}
+    });
+});
+
+
+
+// Simple route middleware to ensure user is authenticated.
+//   Use this route middleware on any resource that needs to be protected.  If
+//   the request is authenticated (typically via a persistent login session),
+//   the request will proceed.  Otherwise, the user will be redirected to the
+//   login page.
+function ensureAuthenticated(req, res, next) {
+    if (req.user) { return next(); }
+    res.redirect('/login');
+}
+
+
+function InsertOrUpdateUserInDatabase(userId, famName, giveName, email, picture, lastSessionId, callback) {
+    //acquire a connection
+    pool.acquire(function (err1, connection) {
+        if (err1) {
+            console.log(err1);
+            callback(err1, false);
+        }
+
+        var request = new Request("IF EXISTS (SELECT * FROM Users WHERE UserId=@UserId) UPDATE Users SET FamilyName=@FamilyName, GivenName=@GivenName, Email=@Email, Picture=@Picture, LastSessionId=@LastSessionId WHERE UserId=@UserId ELSE INSERT INTO Users (UserId, FamilyName, GivenName, Email, Picture, LastSessionId) VALUES(@UserId,@FamilyName,@GivenName,@Email,@Picture,@LastSessionId)", function (err) {
+            if (err) {
+                console.log(err);
+                connection.release();
+                callback(err, false);
+            }
+            else {
+                console.log("success");
+                connection.release();
+                callback(err, true);
+            }
+        });
+        request.addParameter('UserId', TYPES.NChar, userId);
+        request.addParameter('FamilyName', TYPES.NChar, famName);
+        request.addParameter('GivenName', TYPES.NChar, giveName);
+        request.addParameter('Email', TYPES.NChar, email);
+        request.addParameter('Picture', TYPES.NChar, picture);
+        request.addParameter('LastSessionId', TYPES.NChar, lastSessionId);
+        connection.execSql(request);
+    });
+}
 
 module.exports = app;
 https.createServer(options, app).listen(443);
