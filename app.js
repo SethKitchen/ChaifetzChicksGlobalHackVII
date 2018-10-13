@@ -11,6 +11,7 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var GoogleStrategy = require('passport-google-oauth2').Strategy;
+var FacebookStrategy = require('passport-facebook').Strategy;
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -20,7 +21,9 @@ var ConnectionPool = require('tedious-connection-pool');
 var TYPES = require('tedious').TYPES;
 var forceSsl = require('express-force-ssl');
 var GOOGLE_CLIENT_ID = "250633503423-iunr9hrp9cbmppcqfc8e0p8bbc34d6uk.apps.googleusercontent.com";
-var GOOGLE_CLIENT_SECRET = "cqjAY41SnLE9twUiJytKhkvC"; 
+var GOOGLE_CLIENT_SECRET = "cqjAY41SnLE9twUiJytKhkvC";
+var FACEBOOK_CLIENT_ID = "319080175568896";
+var FACEBOOK_CLIENT_SECRET = "504e0155253203b253e6f2d95ee129b7"; 
 var MemoryStore = session.MemoryStore;
 var sessionStore = new MemoryStore();
 
@@ -88,8 +91,45 @@ passport.use(new GoogleStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    //callbackURL: "https://mygrate.herokuapp.com/signin-google",
-    callbackURL: "https://localhost/signin-google",
+    callbackURL: "https://mygrate.herokuapp.com/signin-google",
+    //callbackURL: "https://localhost/signin-google",
+    passReqToCallback: true
+},
+    function (request, accessToken, refreshToken, profile, done) {
+        // asynchronous verification, for effect...
+        process.nextTick(function () {
+
+            // To keep the example simple, the user's Google profile is returned to
+            // represent the logged-in user.  In a typical application, you would want
+            // to associate the Google account with a user record in your database,
+            // and return that user instead.
+            var picture = null;
+            if (profile.photos.length > 0) {
+                picture = profile.photos[0].value;
+            }
+            InsertOrUpdateUserInDatabase(profile.id, profile.name.familyName, profile.name.givenName, profile.email, picture, request.session.id, function () {
+                return done(null, profile);
+            });
+        });
+    }
+));
+
+//   Use the FacebookStrategy within Passport.
+//   Strategies in Passport require a `verify` function, which accept
+//   credentials (in this case, an accessToken, refreshToken, and Facebook
+//   profile), and invoke a callback with a user object.
+passport.use(new FacebookStrategy({
+    clientID: FACEBOOK_CLIENT_ID,
+    clientSecret: FACEBOOK_CLIENT_SECRET,
+    //NOTE :
+    //Carefull ! and avoid usage of Private IP, otherwise you will get the device_id device_name issue for Private IP during authentication
+    //The workaround is to set up thru the facebook cloud console a fully qualified domain name such as http://mydomain:3000/ 
+    //then edit your /etc/hosts local file to point on your private IP. 
+    //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
+    //if you use it.
+    //Switch these depending on release version--
+    callbackURL: "https://mygrate.herokuapp.com/signin-facebook",
+    //callbackURL: "https://localhost/signin-facebook",
     passReqToCallback: true
 },
     function (request, accessToken, refreshToken, profile, done) {
@@ -154,6 +194,14 @@ app.get('/auth/google', passport.authenticate('google', {
         'https://www.googleapis.com/auth/plus.profile.emails.read']
 }));
 
+// GET /auth/facebook
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request.  The first step in Google authentication will involve
+//   redirecting the user to facebook.com.  After authorization, Facebook
+//   will redirect the user back to this application at
+app.get('/auth/facebook',
+    passport.authenticate('facebook', { scope: 'public_profile,email' })
+);
 // GET /auth/google/callback
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  If authentication fails, the user will be redirected back to the
@@ -161,6 +209,12 @@ app.get('/auth/google', passport.authenticate('google', {
 //   which, in this example, will redirect the user to the home page.
 app.get('/signin-google',
     passport.authenticate('google', {
+        successRedirect: '/',
+        failureRedirect: '/login'
+    }));
+
+app.get('/signin-facebook',
+    passport.authenticate('facebook', {
         successRedirect: '/',
         failureRedirect: '/login'
     }));
@@ -197,7 +251,7 @@ app.use(function (req, res, next) {
 if (app.get('env') === 'development') {
     app.use(function (err, req, res, next) {
         res.status(err.status || 500);
-        res.render('error', {
+        res.json({
             message: err.message,
             error: err
         });
@@ -208,7 +262,7 @@ if (app.get('env') === 'development') {
 // no stacktraces leaked to user
 app.use(function (err, req, res, next) {
     res.status(err.status || 500);
-    res.render('error', {
+    res.json({
         message: err.message,
         error: {}
     });
