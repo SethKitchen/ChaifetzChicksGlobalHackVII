@@ -25,8 +25,6 @@
 						<li><a href='/profile'>Profile</a></li>
 						<li><a style='color:crimson'>Posts Near You</a></li>
 						<li><a href='/jobsnearyou'>Jobs Near You</a></li>
-						<li><a href='/trendingposts'>Trending Posts</a></li>
-						<li><a href='/trendingjobs'>Trending Jobs</a></li>
 						<li><a href='/logout'>Logout</a></li>
 					</ul>
 				</nav>
@@ -45,7 +43,7 @@
 					<div style='border:1px solid black; margin: auto; width: 70%; display:table;'>
 						<p style='display:table-cell; width:15%; float:left'><%- (posts[i].DisplayName) %> </p>
 						<p style='width:35%'><%- (posts[i].Message) %> </p>
-						<image <%- "src="+(posts[i].Picture) %> style='width:100px;display:table-cell;'/>
+						<image <%- "src="+(posts[i].Picture) %> style='width:600px;display:table-cell;'/>
 						<p><%- (posts[i].Likes) %> Likes </p>
 						<p><%- (posts[i].Time.substring(0,posts[i].Time.indexOf('2018')+4)) %> </p>
 						<div>

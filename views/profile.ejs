@@ -26,20 +26,6 @@
 									<input style='float:left; width:80%' type="range" min="1" max="100" <%- "value="+(distance) %> id="gpsRange" />
 									<input style='width:20%; border-color: transparent; color:white; background-color: transparent' name='distance' type='text' readonly id='output' />
 								</div>
-								<div style="width:80%">
-									<select name="isRecruiter">
-										<option 
-										value="0"
-										<%if (!recruiter || recruiter==0) { %>
-											selected
-										<% } %>>Immigrant</option>
-										<option
-										value="1"
-										<%if (recruiter==1) { %>
-											selected
-										<% } %>>Recruiter or Immigration Specialist</option>
-									</select>
-								</div>
 								<input type='submit' value='Update' />
 							</form>
 							<hr />
@@ -58,8 +44,6 @@
 						<li><a style='color:crimson'>Profile</a></li>
 						<li><a href='/tabs''>Posts Near You</a></li>
 						<li><a href='/jobsnearyou'>Jobs Near You</a></li>
-						<li><a href='/trendingposts'>Trending Posts</a></li>
-						<li><a href='/trendingjobs'>Trending Jobs</a></li>
 						<li><a href='/logout'>Logout</a></li>
 					</ul>
 				</nav>
