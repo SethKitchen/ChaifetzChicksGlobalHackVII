@@ -140,12 +140,8 @@ passport.use(new FacebookStrategy({
             // represent the logged-in user.  In a typical application, you would want
             // to associate the Google account with a user record in your database,
             // and return that user instead.
-            var picture = null;
             console.log(profile);
-            if (profile.photos.length > 0) {
-                picture = profile.photos[0].value;
-            }
-            InsertOrUpdateUserInDatabase(profile.id, profile.name.familyName, profile.name.givenName, profile.email, picture, request.session.id, function () {
+            InsertOrUpdateUserInDatabase(profile.id, profile.last_name, profile.first_name, profile.email, profile.picture, request.session.id, function () {
                 return done(null, profile);
             });
         });
@@ -201,7 +197,7 @@ app.get('/auth/google', passport.authenticate('google', {
 //   redirecting the user to facebook.com.  After authorization, Facebook
 //   will redirect the user back to this application at
 app.get('/auth/facebook',
-    passport.authenticate('facebook', { scope: ['default', 'email'] })
+    passport.authenticate('facebook', { scope: ['id', 'first_name', 'last_name', 'picture', 'email'] })
 );
 // GET /auth/google/callback
 //   Use passport.authenticate() as route middleware to authenticate the
