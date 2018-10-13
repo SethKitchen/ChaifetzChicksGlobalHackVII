@@ -130,7 +130,8 @@ passport.use(new FacebookStrategy({
     //Switch these depending on release version--
     callbackURL: "https://mygrate.herokuapp.com/signin-facebook",
     //callbackURL: "https://localhost/signin-facebook",
-    passReqToCallback: true
+    passReqToCallback: true,
+    profileFields: ['id', 'displayName', 'photos', 'email']
 },
     function (request, accessToken, refreshToken, profile, done) {
         // asynchronous verification, for effect...
@@ -141,7 +142,11 @@ passport.use(new FacebookStrategy({
             // to associate the Google account with a user record in your database,
             // and return that user instead.
             console.log(profile);
-            InsertOrUpdateUserInDatabase(profile.id, profile.last_name, profile.first_name, profile.email, profile.picture, request.session.id, function () {
+            var picture = null;
+            if (profile.photos.length > 0) {
+                picture = profile.photos[0].value;
+            }
+            InsertOrUpdateUserInDatabase(profile.id, profile.name.familyName, profile.name.givenName, profile.email, picture, request.session.id, function () {
                 return done(null, profile);
             });
         });
