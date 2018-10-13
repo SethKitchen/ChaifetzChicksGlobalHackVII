@@ -238,6 +238,40 @@ app.get('/tabs', ensureAuthenticated, function (req, res) {
     res.render('tabs', { title: 'Chicks', user: req.user });
 });
 
+app.post('/postMessage', ensureAuthenticated, function (req, res) {
+    var id = req.id;
+    var userId = req.user.id;
+    var displayName = req.user.name.givenName + ' ' + req.user.name.familyName;
+    var picture = null;
+    if (user.photos.length > 0) {
+        picture = user.photos[0].value;
+    }
+    var message = req.message;
+    var lat = req.lat;
+    var long = req.long;
+    var time = req.time;
+    if (req.isAnon)
+    {
+        displayName = 'Anonymous';
+        picture = 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/User_font_awesome.svg/1000px-User_font_awesome.svg.png';
+        InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message, lat, long, time, function (err) {
+            if (err) {
+                res.status(err.status || 500);
+                res.json({
+                    message: err.message,
+                    error: err
+                });
+            }
+            else {
+                res.json({
+                    message: 'Successfully Posted!',
+                    error: null
+                });
+            }
+        });
+    }
+});
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     var err = new Error('Not Found');
@@ -312,6 +346,39 @@ function InsertOrUpdateUserInDatabase(userId, famName, giveName, email, picture,
         connection.execSql(request);
     });
 }
+
+function InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message, lat, long, time, callback) {
+    //acquire a connection
+    pool.acquire(function (err1, connection) {
+        if (err1) {
+            console.log(err1);
+            callback(err1, false);
+        }
+
+        var request = new Request("IF EXISTS (SELECT * FROM Posts WHERE id=@PostId) UPDATE Posts SET UserId=@UserId, DisplayName=@DisplayName, Picture=@Picture, Message=@Message, Lat=@Lat, Long=@Long, Time=@Time WHERE PostId=@PostId ELSE INSERT INTO Posts (UserId, DisplayName, Picture, Message, Lat, Long, Time, Likes) VALUES(@UserId,@DisplayName,@Picture,@Message,@Lat,@Long,@Time, 0)", function (err) {
+            if (err) {
+                console.log(err);
+                connection.release();
+                callback(err, false);
+            }
+            else {
+                console.log("success");
+                connection.release();
+                callback(err, true);
+            }
+        });
+        request.addParameter('PostId', TYPES.Int, id);
+        request.addParameter('UserId', TYPES.NChar, userId);
+        request.addParameter('DisplayName', TYPES.NChar, displayName);
+        request.addParameter('Picture', TYPES.NChar, picture);
+        request.addParameter('Message', TYPES.NChar, message);
+        request.addParameter('Lat', TYPES.Decimal, lat);
+        request.addParameter('Long', TYPES.Decimal, long);
+        request.addParameter('Time', TYPES.DateTime, time);
+        connection.execSql(request);
+    });
+}
+
 
 module.exports = app;
 https.createServer(options, app).listen(443);
