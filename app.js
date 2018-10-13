@@ -93,8 +93,8 @@ passport.use(new GoogleStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    //callbackURL: "https://mygrate.herokuapp.com/signin-google",
-    callbackURL: "https://localhost/signin-google",
+    callbackURL: "https://mygrate.herokuapp.com/signin-google",
+    //callbackURL: "https://localhost/signin-google",
     passReqToCallback: true
 },
     function (request, accessToken, refreshToken, profile, done) {
@@ -245,7 +245,7 @@ app.get('/tabs', ensureAuthenticated, function (req, res) {
             GetAllPostsInPastTwoDays(function (err, result) {
                 var geo = geoip.lookup(req.connection.remoteAddress);
                 console.log(geo);
-                for (var i = 0; i < result.length; i++) {
+                for (var i = 0; geo && i < result.length; i++) {
                     if (geolib.getDistance({ latitude: geo.ll[0], longitude: geo.ll[1] }, { latitude: result[i].Lat, longitude: result[i].Long }) > dis) {
                         console.log('splicing');
                         result.splice(i, 1);

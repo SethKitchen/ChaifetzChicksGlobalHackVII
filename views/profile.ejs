@@ -17,20 +17,14 @@
 
 			<!-- Header -->
 				<div id="header">
-
 					<!-- Inner -->
-						<div class="inner">
-							<header>
-								<h1><a href="/" id="logo">myGrate</a></h1>
-								<hr />
-								<button class="loginBtn loginBtn--facebook" onclick="location.href = '/auth/facebook';">
-								  Login with Facebook
-								</button><br />
+						<div class="inner" text-align="left">
+							<p>First Name: <%= user.name.givenName %></p>
+							<p>Last Name: <%= user.name.familyName %></p>
+							<p>Gender: <%= user.gender %></p>
+							<p>Email: <%= user.email %></p>
+							<p>Language: <%= user.language %></p>
 
-								<button class="loginBtn loginBtn--google" onclick="location.href = '/auth/google';">
-								  Login with Google
-								</button>
-							</header>
 						</div>
 
 					<!-- Nav -->
@@ -46,7 +40,8 @@
 							</ul>
 						</nav>
 				</div>
-			</div>
+		</div>
+
 		<!-- Scripts -->
 			<script src="js/jquery.min.js"></script>
 			<script src="js/jquery.dropotron.min.js"></script>
