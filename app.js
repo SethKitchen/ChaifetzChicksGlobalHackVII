@@ -232,6 +232,27 @@ app.get('/', function (req, res) {
     res.render('index', { title: 'Chicks', user: req.user });
 });
 
+app.get('/', function (req, res) {
+    res.render('index', { title: 'Chicks', user: req.user });
+});
+
+app.get('/profile', function (req, res) {
+    res.render('profile', { title: 'Chicks', user: req.user });
+});
+
+app.get('/jobsnearyou', function (req, res) {
+    res.render('jobsnearyou', { title: 'Chicks', user: req.user });
+});
+
+app.get('/trendingposts', function (req, res) {
+    res.render('trendingposts', { title: 'Chicks', user: req.user });
+});
+
+app.get('/trendingjobs', function (req, res) {
+    res.render('trendingjobs', { title: 'Chicks', user: req.user });
+});
+
+
 app.get('/login', function (req, res) {
     res.render('login', { title: 'Chicks', user: req.user });
 });
@@ -438,7 +459,7 @@ function GetAllPostsInPastTwoDays(callback) {
             callback(err1, false);
         }
 
-        var request = new Request("SELECT DisplayName, Picture, Message, Lat, Long, PostId, Likes, Time FROM Posts WHERE Time >= cast(dateadd(day, -2, getdate()) as date)", function (err) {
+        var request = new Request("SELECT DisplayName, Picture, Message, Lat, Long, PostId, Likes, Time FROM Posts WHERE Time >= dateadd(day, -2, getdate()) ORDER BY PostId DESC", function (err) {
             if (err) {
                 console.log(err);
                 connection.release();
