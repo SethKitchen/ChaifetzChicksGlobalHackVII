@@ -91,8 +91,8 @@ passport.use(new GoogleStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    callbackURL: "https://mygrate.herokuapp.com/signin-google",
-    //callbackURL: "https://localhost/signin-google",
+    //callbackURL: "https://mygrate.herokuapp.com/signin-google",
+    callbackURL: "https://localhost/signin-google",
     passReqToCallback: true
 },
     function (request, accessToken, refreshToken, profile, done) {
@@ -128,8 +128,8 @@ passport.use(new FacebookStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    callbackURL: "https://mygrate.herokuapp.com/signin-facebook",
-    //callbackURL: "https://localhost/signin-facebook",
+//callbackURL: "https://mygrate.herokuapp.com/signin-facebook",
+    callbackURL: "https://localhost/signin-facebook",
     passReqToCallback: true,
     profileFields: ['id', 'name', 'photos', 'email']
 },
@@ -234,8 +234,8 @@ app.get('/login', function (req, res) {
     res.render('login', { title: 'Chicks', user: req.user });
 });
 
-app.get('/tabs', ensureAuthenticated, function (req, res) {
-    res.render('tabs', { title: 'Chicks', user: req.user });
+app.get('/profile', ensureAuthenticated, function (req, res) {
+    res.render('profile', { title: 'Chicks', user: req.user });
 });
 
 app.post('/postMessage', ensureAuthenticated, function (req, res) {
