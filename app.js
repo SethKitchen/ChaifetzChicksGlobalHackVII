@@ -19,27 +19,28 @@ var Request = require('tedious').Request;
 var ConnectionPool = require('tedious-connection-pool');
 var TYPES = require('tedious').TYPES;
 var forceSsl = require('express-force-ssl');
-var GOOGLE_CLIENT_ID = ""; //tbd
-var GOOGLE_CLIENT_SECRET = ""; //tbd
+var GOOGLE_CLIENT_ID = "250633503423-ajgjonm0m9cf1sb5lnh97ivgtdcj4eij.apps.googleusercontent.com";
+var GOOGLE_CLIENT_SECRET = "4qmNAVjEMnQLYh9bQK5HrQfy"; //tbd
 var MemoryStore = session.MemoryStore;
 var sessionStore = new MemoryStore();
 
+var GOOGLE
 process.on('uncaughtException', function (err) {
     console.error(err);
     console.log("Node NOT Exiting...");
 });
 
-/var options = {
-    key: fs.readFileSync(''),     // privkey.pem
-    cert: fs.readFileSync('')   // cert.pem
+var options = {
+    key: fs.readFileSync('server.key'),     // privkey.pem
+    cert: fs.readFileSync('server.crt')   // cert.pem
 };
 
 var dbConfig = {
-    server: "", //tbd
-    userName: '', //tbd
-    password: '', //tbd
+    server: "globalhack.database.windows.net", //tbd
+    userName: 'sjkyv5', //tbd
+    password: 'Happybirthday123', //tbd
     // When you connect to Azure SQL Database, you need these next options.  
-    options: { encrypt: true, database: 'Globalhack', rowCollectionOnDone: true }
+    options: { encrypt: true, database: 'GlobalHack', rowCollectionOnDone: true }
 };
 
 var poolConfig = {
