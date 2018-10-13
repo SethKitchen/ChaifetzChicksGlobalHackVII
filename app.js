@@ -251,7 +251,10 @@ app.get('/tabs', ensureAuthenticated, function (req, res) {
                 var geo = geoip.lookup(ip);
                 console.log(geo);
                 for (var i = 0; geo && i < result.length; i++) {
-                    if (geolib.getDistance({ latitude: geo.ll[0], longitude: geo.ll[1] }, { latitude: result[i].Lat, longitude: result[i].Long }) > dis) {
+                    var distance=geolib.getDistance({ latitude: geo.ll[0], longitude: geo.ll[1] }, { latitude: result[i].Lat, longitude: result[i].Long });
+                    console.log(distance);
+                    console.log(dis);
+                    if (distance/1000.0 > dis) {
                         console.log('splicing');
                         result.splice(i, 1);
                         i--;
