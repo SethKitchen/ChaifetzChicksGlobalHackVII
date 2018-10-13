@@ -141,6 +141,7 @@ passport.use(new FacebookStrategy({
             // to associate the Google account with a user record in your database,
             // and return that user instead.
             var picture = null;
+            console.log(profile);
             if (profile.photos.length > 0) {
                 picture = profile.photos[0].value;
             }
