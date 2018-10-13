@@ -201,7 +201,7 @@ app.get('/auth/google', passport.authenticate('google', {
 //   redirecting the user to facebook.com.  After authorization, Facebook
 //   will redirect the user back to this application at
 app.get('/auth/facebook',
-    passport.authenticate('facebook', { scope: 'public_profile,email' })
+    passport.authenticate('facebook', { scope: ['default', 'email'] })
 );
 // GET /auth/google/callback
 //   Use passport.authenticate() as route middleware to authenticate the
