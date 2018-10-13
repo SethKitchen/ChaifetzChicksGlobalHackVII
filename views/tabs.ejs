@@ -20,12 +20,13 @@
 				<!-- Nav -->
 				<nav style="background-color: #000000;"  id="nav">
 					<ul>
-						<li><a href="index.html">Home</a></li>
-						<li><a>Profile</a></li>
+						<li><a href='/'>Home</a></li>
+						<li><a href='/profile'>Profile</a></li>
 						<li><a style='color:crimson'>Posts Near You</a></li>
-						<li><a>Jobs Near You</a></li>
-						<li><a>Trending Posts</a></li>
-						<li><a>Trending Jobs</a></li>
+						<li><a href='/jobsnearyou'>Jobs Near You</a></li>
+						<li><a href='/trendingposts'>Trending Posts</a></li>
+						<li><a href='/trendingjobs'>Trending Jobs</a></li>
+						<li><a href='/logout'>Logout</a></li>
 					</ul>
 				</nav>
 			</div>
@@ -71,7 +72,7 @@
 							var message = $('#status').val();
 							$.post( "/postMessage", { lat:lat, long:long, time: currentdate, message:message }, function(err)
 							{
-								if(err)
+								if(err.message)
 								{
 									document.getElementById('error').innerHTML = err.message || 'Not logged in';
 								}
@@ -96,7 +97,7 @@
 							var message = $('#status').val();
 							$.post( "/postMessage", { lat:lat, long:long, time: currentdate, message:message, isAnon:true }, function(err)
 							{
-								if(err)
+								if(err.message)
 								{
 									document.getElementById('error').innerHTML = err.message || 'Not logged in';
 								}
