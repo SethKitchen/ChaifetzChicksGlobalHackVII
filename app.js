@@ -236,8 +236,18 @@ app.get('/', function (req, res) {
     res.render('index', { title: 'Chicks', user: req.user });
 });
 
-app.get('/profile', function (req, res) {
-    res.render('profile', { title: 'Chicks', user: req.user });
+app.get('/profile', ensureAuthenticated, function (req, res) {
+    GetDistanceAndRecruiter(req.user.id, function (err, json) {
+        res.render('profile', { title: 'Chicks', user: req.user, distance:json[0].Distance, recruiter:json[0].IsRecruiter });
+    });
+});
+
+app.post('/updateDistance', ensureAuthenticated, function (req, res) {
+    UpdateDistanceAndRecruiter(req.user.id, req.body.distance, req.body.isRecruiter, function (err) {
+        GetDistanceAndRecruiter(req.user.id, function (err, json) {
+            res.render('profile', { title: 'Chicks', user: req.user, distance: json[0].Distance, recruiter: json[0].IsRecruiter });
+        });
+    });
 });
 
 app.get('/jobsnearyou', function (req, res) {
@@ -449,6 +459,50 @@ function GetUserDistance(userId, callback) {
     }); 
 }
 
+function GetDistanceAndRecruiter(userId, callback) {
+    var jsonArray = [];
+    //acquire a connection
+    pool.acquire(function (err1, connection) {
+        if (err1) {
+            console.log(err1);
+            callback(err1, false);
+        }
+
+        var request = new Request("SELECT DISTINCT Distance, IsRecruiter FROM Users WHERE UserId = @UserId;", function (err, result) {
+            if (err) {
+                console.log(err);
+                connection.release();
+                callback(err, false);
+            }
+            else {
+                console.log("Get Distance and Recruiter finished calling back with result=" + result);
+                err = null;
+                connection.release();
+                if (jsonArray.length == 0) {
+                    callback(err, null);
+                }
+                else {
+                    callback(err, jsonArray);
+                }
+            }
+        });
+
+        request.addParameter('UserId', TYPES.NChar, userId);
+
+        request.on('doneInProc', function (rowCount, more, rows) {
+            rows.forEach(function (columns) {
+                var rowObject = {};
+                columns.forEach(function (column) {
+                    rowObject[column.metadata.colName] = column.value.toString().trim();
+                });
+                jsonArray.push(rowObject);
+            });
+        });
+
+        connection.execSql(request);
+    });
+}
+
 function GetAllPostsInPastTwoDays(callback) {
     //acquire a connection
     pool.acquire(function (err1, connection) {
@@ -485,6 +539,40 @@ function GetAllPostsInPastTwoDays(callback) {
         connection.execSql(request);
     });
 }
+
+function UpdateDistanceAndRecruiter(userId, distance, is_recruiter, callback) {
+    //acquire a connection
+    try {
+        pool.acquire(function (err1, connection) {
+            if (err1) {
+                console.log(err1);
+                callback(err1, false);
+            }
+
+            var request = new Request("UPDATE Users SET Distance=@Distance, IsRecruiter=@IsRecruiter WHERE UserId=@UserId", function (err) {
+                if (err) {
+                    console.log(err);
+                    connection.release();
+                    callback(err, false);
+                }
+                else {
+                    console.log("success");
+                    connection.release();
+                    callback(err, true);
+                }
+            });
+            request.addParameter('Distance', TYPES.Int, distance);
+            request.addParameter('IsRecruiter', TYPES.Int, is_recruiter);
+            request.addParameter('UserId', TYPES.NChar, userId);
+            connection.execSql(request);
+        });
+    }
+    catch (exception) {
+        var x = 0;
+
+    }
+}
+
 
 function InsertOrUpdatePostInDatabase(id, userId, displayName, picture, message, lat, long, time, callback) {
     //acquire a connection
