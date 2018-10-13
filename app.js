@@ -243,7 +243,12 @@ app.get('/tabs', ensureAuthenticated, function (req, res) {
         }
         else {
             GetAllPostsInPastTwoDays(function (err, result) {
-                var geo = geoip.lookup(req.connection.remoteAddress);
+                var ip = (req.headers['x-forwarded-for'] || '').split(',').pop() ||
+                    req.connection.remoteAddress ||
+                    req.socket.remoteAddress ||
+                    req.connection.socket.remoteAddress;
+
+                var geo = geoip.lookup(ip);
                 console.log(geo);
                 for (var i = 0; geo && i < result.length; i++) {
                     if (geolib.getDistance({ latitude: geo.ll[0], longitude: geo.ll[1] }, { latitude: result[i].Lat, longitude: result[i].Long }) > dis) {
