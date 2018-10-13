@@ -46,7 +46,7 @@
 						<p style='width:35%'><%- (posts[i].Message) %> </p>
 						<image <%- "src="+(posts[i].Picture) %> style='width:100px;display:table-cell;'/>
 						<p><%- (posts[i].Likes) %> Likes </p>
-						<p><%- (posts[i].Time) %> </p>
+						<p><%- (posts[i].Time.substring(0,posts[i].Time.indexOf('2018')+4)) %> </p>
 					</div>	
 				<% } %>
 		</div>
