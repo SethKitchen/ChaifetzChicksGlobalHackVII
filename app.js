@@ -385,7 +385,7 @@ function GetUserDistance(userId, callback) {
             callback(err1, false);
         }
 
-        var request = new Request("SELECT @dis=Distance FROM Users WHERE UserId = @UserId;", function (err) {
+        var request = new Request("SELECT @Distance=Distance FROM Users WHERE UserId = @UserId;", function (err) {
             if (err) {
                 console.log(err);
                 connection.release();
@@ -400,7 +400,7 @@ function GetUserDistance(userId, callback) {
         });
 
         request.addParameter('UserId', TYPES.NChar, userId);
-        request.addOutputParameter('dis', TYPES.Int);
+        request.addOutputParameter('Distance', TYPES.Int);
 
 
         request.on('returnValue', function (parameterName, value, metadata) {
