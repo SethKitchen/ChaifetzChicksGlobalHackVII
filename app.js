@@ -22,8 +22,8 @@ var Request = require('tedious').Request;
 var ConnectionPool = require('tedious-connection-pool');
 var TYPES = require('tedious').TYPES;
 var forceSsl = require('express-force-ssl');
-var GOOGLE_CLIENT_ID = "250633503423-iunr9hrp9cbmppcqfc8e0p8bbc34d6uk.apps.googleusercontent.com";
-var GOOGLE_CLIENT_SECRET = "cqjAY41SnLE9twUiJytKhkvC";
+var GOOGLE_CLIENT_ID = "333277965318-8qmf66phhhjlnlgv9hatk12jl6no81ur.apps.googleusercontent.com";
+var GOOGLE_CLIENT_SECRET = "7ruddy8HEbt2qA4bdMcpW0dg";
 var FACEBOOK_CLIENT_ID = "319080175568896";
 var FACEBOOK_CLIENT_SECRET = "504e0155253203b253e6f2d95ee129b7"; 
 var MemoryStore = session.MemoryStore;
@@ -93,8 +93,8 @@ passport.use(new GoogleStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    //callbackURL: "https://myGration.herokuapp.com/signin-google",
-    callbackURL: "https://localhost/signin-google",
+    callbackURL: "https://myGration.herokuapp.com/signin-google",
+    //callbackURL: "https://localhost/signin-google",
     passReqToCallback: true
 },
     function (request, accessToken, refreshToken, profile, done) {

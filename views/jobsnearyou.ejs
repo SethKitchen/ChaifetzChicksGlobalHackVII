@@ -9,11 +9,12 @@
 		<title>myGration</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<!--[if lte IE 8]><script src="js/ie/html5shiv.js"></script><![endif]-->
 		<link rel="stylesheet" href="css/main.css" />
-		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie8.css" /><![endif]-->
 	</head>
 	<body class="left-sidebar">
+		<div id="google_translate_element"></div>
 		<div id="page-wrapper">
 			<!-- Header -->
 			<div id="header">
@@ -24,33 +25,14 @@
 						<li><a href='/profile'>Profile</a></li>
 						<li><a href='/tabs'>Posts Near You</a></li>
 						<li><a style='color:crimson'>Jobs Near You</a></li>
-						<li><a href='/trendingposts'>Trending Posts</a></li>
-						<li><a href='/trendingjobs'>Trending Jobs</a></li>
 						<li><a href='/logout'>Logout</a></li>
 					</ul>
 				</nav>
 			</div>
 		</div>
-		<p style="color:crimson" id='error'></p>
-
-		<div style="margin: auto; width: 70%; display:table;">
-			<textarea style="width:100%; display:table-cell;" id='status' placeholder="Tell the world you're on your way..."></textarea>
-			<span style="width:25%; display:table-cell;	vertical-align:middle;"><input type="button" onclick="DoPost()" value="Post" /></span>
-			<span style="width:25%; display:table-cell;	vertical-align:middle;"><input type="button" onclick="DoPostAnon()" value="Post Anonymously" /></span>
-		</div>
-
-		<div>
-				<% for(var i=0; posts && i<posts.length; i++) {%>
-					<div style='border:1px solid black; margin: auto; width: 70%; display:table;'>
-						<p style='display:table-cell; width:15%; float:left'><%- (posts[i].DisplayName) %> </p>
-						<p style='width:35%'><%- (posts[i].Message) %> </p>
-						<image <%- "src="+(posts[i].Picture) %> style='width:100px;display:table-cell;'/>
-						<p><%- (posts[i].Likes) %> Likes </p>
-						<p><%- (posts[i].Time.substring(0,posts[i].Time.indexOf('2018')+4)) %> </p>
-					</div>	
-				<% } %>
-		</div>
-
+		<iframe width="300" height="300" src="https://www.stltoday.com/jobs/now-hiring-in-st-louis-recently-posted-employment-opportunities-for/collection_11ca784e-6973-5c89-91a1-f000c78ceae9.htm" />
+		<iframe width="300" height="300" src="https://jobs.mo.gov/content/find-hiring-event-near-you" />
+		
 		<!-- Scripts -->
 			<script src="js/jquery.min.js"></script>
 			<script src="js/jquery.dropotron.min.js"></script>
@@ -58,59 +40,13 @@
 			<script src="js/jquery.onvisible.min.js"></script>
 			<script src="js/skel.min.js"></script>
 			<script src="js/util.js"></script>
-			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<!--[if lte IE 8]><script src="js/ie/respond.min.js"></script><![endif]-->
 			<script src="js/main.js"></script>
-			<script>
-
-				function DoPost()
-				{
-					if (navigator.geolocation) {
-						navigator.geolocation.getCurrentPosition(function(position) {
-							var lat=position.coords.latitude;
-							var long=position.coords.longitude;
-							var currentdate = new Date();
-							var message = $('#status').val();
-							$.post( "/postMessage", { lat:lat, long:long, time: currentdate, message:message }, function(err)
-							{
-								if(err.message)
-								{
-									document.getElementById('error').innerHTML = err.message || 'Not logged in';
-								}
-								else
-								{
-									location.reload();
-								}
-							});
-						});
-					} else {
-						document.getElementById('error').innerHTML = "Geolocation is not supported by this browser.";
-					}
-				}
-
-				function DoPostAnon()
-				{
-					if (navigator.geolocation) {
-						navigator.geolocation.getCurrentPosition(function(position) {
-							var lat=position.coords.latitude;
-							var long=position.coords.longitude;
-							var currentdate = new Date();
-							var message = $('#status').val();
-							$.post( "/postMessage", { lat:lat, long:long, time: currentdate, message:message, isAnon:true }, function(err)
-							{
-								if(err.message)
-								{
-									document.getElementById('error').innerHTML = err.message || 'Not logged in';
-								}
-								else
-								{
-									location.reload();
-								}
-							});
-						});
-					} else {
-						document.getElementById('error').innerHTML = "Geolocation is not supported by this browser.";
-					}
-				}
-			</script>
+			<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+            <script type="text/javascript">
+            function googleTranslateElementInit() {
+            new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+            }
+            </script>
 	</body>
 </html>
