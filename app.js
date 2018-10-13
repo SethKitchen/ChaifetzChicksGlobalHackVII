@@ -404,7 +404,7 @@ function GetUserDistance(userId, callback) {
 
 
         request.on('returnValue', function (parameterName, value, metadata) {
-            if (parameterName === 'dis' && value) {
+            if (parameterName === 'Distance' && value) {
                 result = value;
             }
         });
