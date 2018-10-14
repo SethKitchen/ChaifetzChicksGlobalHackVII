@@ -28,11 +28,12 @@ var FACEBOOK_CLIENT_ID = "319080175568896";
 var FACEBOOK_CLIENT_SECRET = "504e0155253203b253e6f2d95ee129b7"; 
 var MemoryStore = session.MemoryStore;
 var sessionStore = new MemoryStore();
-var edge = require('edge');
+//var edge = require('edge');
 
+/*
 var helloWorld = edge.func({
     assemblyFile:'Pdfwork.dll'
-});
+});*/
 
 process.on('uncaughtException', function (err) {
     console.error(err);
@@ -625,9 +626,9 @@ function FillPDF(file, first_name, last_name, address, phone_number, email, city
 {
     var strings=[file, first_name, last_name, address, phone_number, email, city, zip, state, country, birth_date, gender, language]
 
-    helloWorld(strings, function (error, result) {
+    /*helloWorld(strings, function (error, result) {
         callback(error, result);
-    });
+    });*/
 }
 
 function AddLikeIfPossible(postId, userId, callback)
