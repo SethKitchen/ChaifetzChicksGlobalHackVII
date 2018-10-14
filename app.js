@@ -314,7 +314,7 @@ app.post('/likeMessage', ensureAuthenticated, function (req, res) {
 });
 
 app.get('/getpdfnames', function(req,res) {
-    fs.readdir('./pdfs/', (err, files) => {
+    fs.readdir('./bobs/', (err, files) => {
         console.log(files);
         res.send(files);
     });
@@ -324,10 +324,16 @@ app.get('/pdfs', function(req,res) {
     res.render('pdfs', { title: 'Chicks', user: req.user });
 });
 
-app.post('/fill', function(req,res) {
-    FillPDF(req.body.file_name, req.user.name.givenName, req.user.name.familyName, req.body.address, req.body.phone, req.user.email, req.body.city, req.body.zip, req.body.state, req.body.country,req.body.birth_date,req.body.gender,req.body.language,function(err, result) {
-        res.download(req.body.file_name.substring(0,req.body.file_name.lastIndexOf('.'))+'filled.pdf');
-    });
+app.post('/fill', function (req, res) {
+    try {
+        console.log('bobs/' + req.body.file_name);
+        FillPDF('bobs/'+req.body.file_name, req.user.name.givenName, req.user.name.familyName, req.body.address, req.body.phone, req.user.email, req.body.city, req.body.zip, req.body.state, req.body.country, req.body.birth_date, req.body.gender, req.body.language, function (err, result) {
+            res.download('bobs/'+req.body.file_name.substring(0, req.body.file_name.lastIndexOf('.')) + 'filled.pdf');
+        });
+    }
+    catch (ex) {
+        console.log(ex);
+    }
 });
 
 app.post('/postMessage', ensureAuthenticated, function (req, res) {
@@ -608,8 +614,10 @@ function UpdateDistance(userId, distance, callback) {
 function FillPDF(file, first_name, last_name, address, phone_number, email, city, zip, state, country, birth_date, gender, language, callback)
 {
     var strings=[file, first_name, last_name, address, phone_number, email, city, zip, state, country, birth_date, gender, language]
-
+    console.log(file);
     helloWorld(strings, function (error, result) {
+        console.log(error);
+        console.log(result);
         callback(error, result);
     });
 }
