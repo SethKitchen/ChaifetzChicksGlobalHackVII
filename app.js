@@ -320,7 +320,7 @@ app.get('/getpdfnames', function(req,res) {
     });
 });
 
-app.get('/pdfs', function(req,res) {
+app.get('/pdfs', ensureAuthenticated, function(req,res) {
     res.render('pdfs', { title: 'Chicks', user: req.user });
 });
 

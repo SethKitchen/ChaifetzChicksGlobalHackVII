@@ -49,21 +49,20 @@
 						</div>
 
 				<!-- Nav -->
-				<nav style="background-color: #000000;"  id="nav">
-					<ul>
-						<li><a href='/'>Home</a></li>
-						<li><a href='/profile'>Profile</a></li>
-						<li><a href='/tabs'>Posts Near You</a></li>
-						<li><a style='color:crimson'>PDF Fill</a></li>
-						<%if (!user) { %>
-	          	<li><a href="/login">Login</a></li>
-						<% } else { %>
-	          	<li><a href="/profile">My Profile</a></li>
-	          	<li><a href="/logout">Logout</a></li>
-						<% } %>
-					</ul>
-				</nav>
-				</div>
+                <nav style="background-color: #000000;"  id="nav">
+                  <ul>
+                    <li><a href='/'>Home</a></li>
+                    <li><a href='/tabs'>Posts Near You</a></li>
+                    <li><a href='/pdfs' style="color:crimson">PDF Fill</a></li>
+                    <%if (!user) { %>
+                      <li><a href="/login">Login</a></li>
+                    <% } else { %>
+                      <li><a href="/profile">My Profile</a></li>
+                      <li><a href="/logout">Logout</a></li>
+                    <% } %>
+                  </ul>
+                </nav>
+			</div>
 		</div>
 
 		<!-- Scripts -->
