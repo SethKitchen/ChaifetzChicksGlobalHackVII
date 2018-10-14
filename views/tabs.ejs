@@ -36,14 +36,14 @@
 
 		<div style="margin: auto; width: 70%; display:table;">
 			<textarea style="width:100%; display:table-cell; resize: none" id='status'></textarea>
-			<span style="width:50%; display:table-cell;	vertical-align:middle;"><input type="button" style="margin: 10px" onclick="DoPost()" value="Post" /><input type="button" style="margin: 10px" onclick="DoPostAnon()" value="Post Anonymously" /></span>
+			<span style="width:50%; display:table-cell;	vertical-align:middle;"><input type="button" style="margin: 10px" onclick="DoPost()" value="Post" /><input type="button" onclick="DoPostAnon()" value="Post Anonymously" /></span>
 		</div>
 
 		<br></br>
 
-		<div style="color:yellow">
+		<div style="color: #f98526">
 				<% for(var i=0; posts && i<posts.length; i++) {%>
-					<div style='border-radius: 5px; border:2px solid black; margin: auto; width: 70%; display:table;'>
+					<div style='border-radius: 5px; border:2px solid black; margin: auto; margin-bottom: 5px; background-color: rgba(255, 255, 255, 0.4); width: 70%; display:table;'>
 						<p style='margin: 10px; display:table-cell; width:15%; float:left'><%- (posts[i].DisplayName) %> </p>
 						<p style='margin: 10px; width:35%'><%- (posts[i].Message) %> </p>
 						<image <%- "src="+(posts[i].Picture) %> style='margin: 10px; width:50px;display:table-cell;'/>
