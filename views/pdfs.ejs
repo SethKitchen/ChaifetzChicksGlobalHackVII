@@ -20,9 +20,32 @@
 				<div id="header">
 					<!-- Inner -->
 						<div class="inner" id='pdfLoadSpace' text-align="left">
-							<select id='pdfOptions' onchange='GrabFile()'>
-                                <option disabled>loading...</option>
-                            </select>
+                            <form method='POST' action='/fill'>
+                                <p>File Name</p>
+                                <select onchange="updateHidden()" id='pdfOptions'>
+                                    <option disabled>loading...</option>
+                                </select>
+                                <input type='hidden' id='file_name' name='file_name' />
+                                <p>Address</p>
+                                <input type='text' name='address' />
+                                <p>Phone Number</p>
+                                <input type='text' name='phone' />
+                                <p>City</p>
+                                <input type='text' name='city' />
+                                <p>Zip</p>
+                                <input type='text' name='zip' />
+                                <p>State</p>
+                                <input type='text' name='state' />
+                                <p>Country</p>
+                                <input type='text' name='country' />
+                                <p>Birthdate (dd/mm/yyyy)</p>
+                                <input type='text' name='birth_date' />
+                                <p>Gender</p>
+                                <input type='text' name='gender' />
+                                <p>Language</p>
+                                <input type='text' name='language' />
+                                <input type='submit' value='Fill Form' />
+                            </form>
 						</div>
 
 				<!-- Nav -->
@@ -66,10 +89,15 @@ $( document ).ready(function() {
     });
 });
 
+function updateHidden()
+{
+    document.getElementById('file_name').value=$("#pdfOptions").val();
+}
+
 function GrabFile()
 {
     var toGet=$("#pdfOptions").val();
-    $.get('/pdfFile',{file_name:toGet},function(result)
+    $.post('/pdfFile/',{file_name:toGet},function(result)
     {
         try
         {

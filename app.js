@@ -28,12 +28,12 @@ var FACEBOOK_CLIENT_ID = "319080175568896";
 var FACEBOOK_CLIENT_SECRET = "504e0155253203b253e6f2d95ee129b7"; 
 var MemoryStore = session.MemoryStore;
 var sessionStore = new MemoryStore();
-//var edge = require('edge');
+var edge = require('edge');
 
-/*
+
 var helloWorld = edge.func({
     assemblyFile:'Pdfwork.dll'
-});*/
+});
 
 process.on('uncaughtException', function (err) {
     console.error(err);
@@ -136,8 +136,8 @@ passport.use(new FacebookStrategy({
     //Also both sign-in button + callbackURL has to be share the same url, otherwise two cookies will be created and lead to lost your session
     //if you use it.
     //Switch these depending on release version--
-    callbackURL: "https://myGration.herokuapp.com/signin-facebook",
-    //callbackURL: "https://localhost/signin-facebook",
+    //callbackURL: "https://myGration.herokuapp.com/signin-facebook",
+    callbackURL: "https://localhost/signin-facebook",
     passReqToCallback: true,
     profileFields: ['id', 'name', 'photos', 'email']
 },
@@ -235,10 +235,6 @@ app.get('/logout', function (req, res) {
 });
 
 app.get('/', function (req, res) {
-    res.render('pdfs', { title: 'Chicks', user: req.user });
-});
-
-app.get('/', function (req, res) {
     res.render('index', { title: 'Chicks', user: req.user });
 });
 
@@ -324,26 +320,13 @@ app.get('/getpdfnames', function(req,res) {
     });
 });
 
-app.get('/pdfFile', function(req, res) {
-    console.log(req.query);
-    console.log(__dirname +'/pdfs/'+req.query.file_name);
-    try{
-    res.sendFile(__dirname +'/pdfs/'+req.query.file_name);
-    }
-    catch(ex)
-    {
-        console.log(ex);
-        res.send(ex);
-    }
-});
-
 app.get('/pdfs', function(req,res) {
     res.render('pdfs', { title: 'Chicks', user: req.user });
 });
 
 app.post('/fill', function(req,res) {
-    FillPDF(req.body.file_name, req.body.first_name, req.body.last_name, req.body.address, req.body.phone_number, req.body.email, req.body.city, req.body.zip, req.body.state, req.body.country,req.body.birth_date,req.body.gender,req.body.language,function(err, result) {
-        res.sendFile(req.body.file_name.substring(0,req.body.file_name.lastIndexOf('.'))+'filled.pdf');
+    FillPDF(req.body.file_name, req.user.name.givenName, req.user.name.familyName, req.body.address, req.body.phone, req.user.email, req.body.city, req.body.zip, req.body.state, req.body.country,req.body.birth_date,req.body.gender,req.body.language,function(err, result) {
+        res.download(req.body.file_name.substring(0,req.body.file_name.lastIndexOf('.'))+'filled.pdf');
     });
 });
 
@@ -626,9 +609,9 @@ function FillPDF(file, first_name, last_name, address, phone_number, email, city
 {
     var strings=[file, first_name, last_name, address, phone_number, email, city, zip, state, country, birth_date, gender, language]
 
-    /*helloWorld(strings, function (error, result) {
+    helloWorld(strings, function (error, result) {
         callback(error, result);
-    });*/
+    });
 }
 
 function AddLikeIfPossible(postId, userId, callback)
