@@ -33,10 +33,12 @@
 		<p style="color:crimson" id='error'></p>
 
 		<div style="margin: auto; width: 70%; display:table;">
-			<textarea style="width:100%; display:table-cell;" id='status' placeholder="Tell the world you're on your way..."></textarea>
+			<textarea style="width:100%; display:table-cell;" id='status'></textarea>
 			<span style="width:25%; display:table-cell;	vertical-align:middle;"><input type="button" onclick="DoPost()" value="Post" /></span>
 			<span style="width:25%; display:table-cell;	vertical-align:middle;"><input type="button" onclick="DoPostAnon()" value="Post Anonymously" /></span>
 		</div>
+
+		<br></br>
 
 		<div>
 				<% for(var i=0; posts && i<posts.length; i++) {%>
