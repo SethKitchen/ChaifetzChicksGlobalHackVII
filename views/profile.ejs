@@ -44,7 +44,12 @@
 						<li><a style='color:crimson'>Profile</a></li>
 						<li><a href='/tabs'>Posts Near You</a></li>
 						<li><a href='/jobsnearyou'>Jobs Near You</a></li>
-						<li><a href='/logout'>Logout</a></li>
+						<%if (!user) { %>
+	          	<li><a href="/login">Login</a></li>
+						<% } else { %>
+	          	<li><a href="/profile">My Profile</a></li>
+	          	<li><a href="/logout">Logout</a></li>
+						<% } %>
 					</ul>
 				</nav>
 				</div>
