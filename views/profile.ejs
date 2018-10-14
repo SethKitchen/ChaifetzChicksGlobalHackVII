@@ -22,7 +22,7 @@
 						<div class="inner" text-align="left">
 							<form action='/updateDistance' method='post'>
 								<div style="width:80%">
-									<p>How far away do you want to receive messages and jobs (kilometers)?</p>
+									<p>How far away do you want to receive messages (kilometers)?</p>
 									<input style='float:left; width:80%' type="range" min="1" max="100" <%- "value="+(distance) %> id="gpsRange" />
 									<input style='width:20%; border-color: transparent; color:white; background-color: transparent' name='distance' type='text' readonly id='output' />
 								</div>
@@ -43,7 +43,7 @@
 						<li><a href='/'>Home</a></li>
 						<li><a style='color:crimson'>Profile</a></li>
 						<li><a href='/tabs'>Posts Near You</a></li>
-						<li><a href='/jobsnearyou'>Jobs Near You</a></li>
+						<li><a href='/pdfs'>PDF Fill</a></li>
 						<%if (!user) { %>
 	          	<li><a href="/login">Login</a></li>
 						<% } else { %>
